@@ -2,9 +2,11 @@ import re
 import sched
 import subprocess
 import sys
+import os
 import time
 from datetime import datetime
 from pathlib import Path
+from os.path import expanduser
 
 event_schedule = sched.scheduler(time.time, time.sleep)
 
@@ -318,6 +320,18 @@ def process_crontab(crontab_file=None):
 
 
 def main(args):
+
+    if os.name=="nt":
+        # Windows
+        PID_DIR = expanduser("~")
+    else:
+        # Possible POSIX. Linux etc..
+        PID_DIR = "/var/run/"
+    PID_FILE = os.path.join(PID_DIR,'crontab-win.pid')
+    f = open(PID_FILE, 'w')   # new or overwrite if exist
+    f.write(str(os.getpid()))
+    f.close()
+
     print("Crontab is active, please keep this minimized")
     if args.crontab_file:
         print(f"To schedule tasks use the {args.crontab_file}")
